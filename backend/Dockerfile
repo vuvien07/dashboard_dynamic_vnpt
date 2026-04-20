@@ -1,4 +1,15 @@
+# Stage 1: Build JAR
+FROM amazoncorretto:21-alpine-jdk AS builder
+WORKDIR /app
+RUN apk add --no-cache maven
+COPY pom.xml .
+RUN mvn dependency:go-offline -B
+COPY src ./src
+RUN mvn package -DskipTests
+
+# Stage 2: Run
 FROM amazoncorretto:21-alpine-jdk
-MAINTAINER vuvien07
-COPY target/backend-0.0.1-SNAPSHOT.jar backend-0.0.1-SNAPSHOT.jar
-ENTRYPOINT ["java", "-jar", "/backend-0.0.1-SNAPSHOT.jar"]
+WORKDIR /app
+COPY --from=builder /app/target/*.jar app.jar
+EXPOSE 8080
+ENTRYPOINT ["java", "-jar", "app.jar"]
