@@ -1,0 +1,36 @@
+.range-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.range-label {
+  font-size: 13px;
+  color: var(--text-secondary, #6b7280);
+}
+
+.range-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.range-input {
+  flex: 1;
+  min-width: 0; // quan trọng để input không overflow
+   border: 1.5px solid var(--hc-border);
+  border-radius: 7px;
+  padding: 9px 12px;
+  background: #fff;
+  color: var(--hc-text);
+  font-size: 13px;
+  box-sizing: border-box;
+  font-family: inherit;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.range-sep {
+  font-size: 13px;
+  color: #9ca3af;
+  flex-shrink: 0;
+}

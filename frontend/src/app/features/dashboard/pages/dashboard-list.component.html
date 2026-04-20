@@ -1,0 +1,105 @@
+<section class="page">
+  <div class="page-decor decor-top"></div>
+  <div class="page-decor decor-bottom"></div>
+
+  <header class="hero">
+    <div>
+      <p class="eyebrow">Hospital Insight Console</p>
+      <h1>Danh sách Dashboard</h1>
+      <p class="hero-subtitle">Chọn dashboard để theo dõi dữ liệu thời gian thực hoặc tùy chỉnh bố cục widget theo từng vai trò vận hành.</p>
+    </div>
+    <span class="summary-chip">Tổng số: {{ dashboards.length }}</span>
+  </header>
+
+  <section class="guide-shortcut">
+    <div>
+      <h2>Chưa rõ bắt đầu từ đâu?</h2>
+      <p>Mở menu hướng dẫn từng bước có hình minh họa và link thao tác trực tiếp.</p>
+    </div>
+    <a class="primary-btn" routerLink="/guide">Mở menu hướng dẫn</a>
+  </section>
+
+  <section class="create-panel">
+    <div class="create-title">
+      <h2>Tạo dashboard mới</h2>
+      <p>Khởi tạo dashboard rỗng và chuyển sang màn hình chỉnh sửa ngay sau khi tạo.</p>
+    </div>
+
+    <form class="create-form" (ngSubmit)="createDashboard()">
+      <label>
+        <span>Tên dashboard</span>
+        <input
+          type="text"
+          name="dashboardName"
+          [(ngModel)]="newDashboard.name"
+          placeholder="Ví dụ: Theo dõi ICU theo ca trực"
+          required />
+      </label>
+
+      <label>
+        <span>Mô tả</span>
+        <input
+          type="text"
+          name="dashboardDescription"
+          [(ngModel)]="newDashboard.description"
+          placeholder="Mục đích sử dụng dashboard" />
+      </label>
+
+      <label>
+        <span>Quyền truy cập</span>
+        <select name="dashboardVisibility" [(ngModel)]="newDashboard.visibility">
+          <option value="private">private</option>
+          <option value="public">public</option>
+        </select>
+      </label>
+
+      <div class="create-actions">
+        <button type="submit" class="primary-btn" [disabled]="isCreating">
+          {{ isCreating ? 'Đang tạo...' : 'Tạo dashboard' }}
+        </button>
+        <p class="create-error" *ngIf="createError">{{ createError }}</p>
+      </div>
+    </form>
+  </section>
+
+  <p class="create-error" *ngIf="deleteError">{{ deleteError }}</p>
+
+  <ul class="cards" *ngIf="dashboards.length > 0; else empty">
+    <li *ngFor="let dashboard of dashboards" class="card-item">
+      <div class="card-head">
+        <h3>{{ dashboard.name }}</h3>
+        <span class="id-pill">{{ dashboard.id }}</span>
+      </div>
+
+      <div class="meta-grid">
+        <div>
+          <span class="meta-label">Trạng thái</span>
+          <strong>{{ dashboard.status }}</strong>
+        </div>
+        <div>
+          <span class="meta-label">Quyền truy cập</span>
+          <strong>{{ dashboard.visibility }}</strong>
+        </div>
+      </div>
+
+      <div class="actions">
+        <a class="ghost-btn" [routerLink]="['/dashboards', dashboard.id, 'view']">Xem</a>
+        <a class="primary-btn" [routerLink]="['/dashboards', dashboard.id, 'edit']">Tùy chỉnh</a>
+        <button
+          type="button"
+          class="danger-btn"
+          [disabled]="deletingDashboardId === dashboard.id"
+          (click)="deleteDashboard(dashboard)">
+          {{ deletingDashboardId === dashboard.id ? 'Đang xóa...' : 'Xóa' }}
+        </button>
+      </div>
+    </li>
+  </ul>
+
+  <ng-template #empty>
+    <section class="empty-state">
+      <h3>Chưa có dashboard nào</h3>
+      <p>Hãy import sample data hoặc tạo dashboard mới để bắt đầu.</p>
+    </section>
+  </ng-template>
+</section>

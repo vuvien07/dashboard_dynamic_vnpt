@@ -1,0 +1,10 @@
+<svg width="1200" height="500" viewBox="0 0 1200 500" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="500" fill="#f3f7ff"/>
+  <rect x="80" y="70" width="1040" height="360" rx="20" fill="#ffffff" stroke="#d3dff4"/>
+  <rect x="120" y="110" width="280" height="120" rx="12" fill="#dbe8ff"/>
+  <rect x="420" y="110" width="280" height="120" rx="12" fill="#dbe8ff"/>
+  <rect x="720" y="110" width="360" height="120" rx="12" fill="#dbe8ff"/>
+  <rect x="120" y="250" width="460" height="140" rx="12" fill="#edf3ff" stroke="#dbe7fb"/>
+  <rect x="600" y="250" width="480" height="140" rx="12" fill="#edf3ff" stroke="#dbe7fb"/>
+  <text x="140" y="102" font-size="24" fill="#0f62fe" font-family="Segoe UI">Layout Strategy</text>
+</svg>

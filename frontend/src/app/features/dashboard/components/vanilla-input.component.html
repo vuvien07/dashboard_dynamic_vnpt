@@ -1,0 +1,39 @@
+<div [formGroup]="form" class="cb-wrapper">
+  <div class="cb-input-row" [class.is-open]="isOpen">
+    <input
+      #inputRef
+      class="cb-input"
+      [type]="inputKind"
+      formControlName="value"
+      [placeholder]="placeholder"
+      autocomplete="off"
+      (focus)="openDropdown()"
+      (blur)="closeDropdown()"
+    />
+    <button
+      *ngIf="hasOptions"
+      type="button"
+      class="cb-chevron"
+      tabindex="-1"
+      (mousedown)="$event.preventDefault(); toggleDropdown()"
+    >
+      <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+        <path d="M2 4l4 4 4-4" stroke="currentColor"
+              stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
+  </div>
+
+  <div class="cb-dropdown" *ngIf="isOpen && hasOptions">
+    <div
+      class="cb-option"
+      *ngFor="let opt of filteredOptions"
+      (mousedown)="$event.preventDefault(); selectOption(opt)"
+    >
+      {{ opt.label }}
+    </div>
+    <div class="cb-empty" *ngIf="!filteredOptions.length">
+      Không tìm thấy — bạn có thể nhập tự do
+    </div>
+  </div>
+</div>

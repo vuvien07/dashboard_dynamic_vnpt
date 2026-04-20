@@ -1,0 +1,12 @@
+<svg width="1200" height="500" viewBox="0 0 1200 500" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="500" fill="#f8fbff"/>
+  <rect x="90" y="80" width="500" height="340" rx="16" fill="#ffffff" stroke="#d6e2f4"/>
+  <text x="120" y="130" font-size="28" fill="#153451" font-family="Segoe UI">Widget Query</text>
+  <rect x="120" y="165" width="440" height="44" rx="8" fill="#f4f8fe" stroke="#dae6f8"/>
+  <rect x="120" y="225" width="440" height="44" rx="8" fill="#f4f8fe" stroke="#dae6f8"/>
+  <rect x="120" y="285" width="440" height="44" rx="8" fill="#f4f8fe" stroke="#dae6f8"/>
+  <rect x="640" y="80" width="470" height="340" rx="16" fill="#ffffff" stroke="#d6e2f4"/>
+  <text x="670" y="130" font-size="28" fill="#153451" font-family="Segoe UI">Preview Result</text>
+  <polyline points="680,300 760,240 840,260 920,180 1000,210" fill="none" stroke="#0f62fe" stroke-width="6"/>
+  <circle cx="1000" cy="210" r="8" fill="#0f62fe"/>
+</svg>

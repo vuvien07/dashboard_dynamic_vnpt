@@ -1,0 +1,82 @@
+<div class="ms-wrapper" [class.disabled]="disabled">
+  <!-- Trigger -->
+  <button type="button" class="ms-trigger" (click)="toggleDropdown()">
+    <span class="ms-summary" [class.placeholder]="!selectedValues.length">
+      {{ summary || placeholder }}
+    </span>
+    <svg class="ms-chevron" [class.open]="isOpen"
+         width="14" height="14" viewBox="0 0 14 14">
+      <path d="M2 4.5L7 9.5L12 4.5"
+            stroke="currentColor" stroke-width="1.5"
+            fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </button>
+
+  <!-- Dropdown -->
+  <div class="ms-dropdown" *ngIf="isOpen">
+    <div class="ms-search-wrap">
+      <input
+        type="text"
+        class="ms-search"
+        placeholder="Tìm kiếm..."
+        [(ngModel)]="searchText"
+        (click)="$event.stopPropagation()"
+        autofocus
+      />
+    </div>
+
+        <!-- TAG MODE: danh sách tags đã thêm + gợi ý thêm mới -->
+    <ng-container *ngIf="isTagMode">
+      <div class="ms-custom-tags" *ngIf="customTags.length">
+        <span class="ms-tag" *ngFor="let tag of customTags">
+          {{ tag }}
+          <button type="button" class="ms-tag-remove" (click)="removeTag(tag)">×</button>
+        </span>
+      </div>
+
+      <div class="ms-option ms-add-tag" *ngIf="canAddTag" (click)="addTag()">
+        <span class="ms-tag-icon">+</span>
+        Thêm "<strong>{{ searchText.trim() }}</strong>"
+      </div>
+
+      <div class="ms-empty" *ngIf="!customTags.length && !canAddTag">
+        Nhập giá trị và nhấn Enter để thêm
+      </div>
+    </ng-container>
+
+
+    <!-- LIST MODE: chọn từ options -->
+    <ng-container *ngIf="!isTagMode">
+      <div class="ms-options">
+        <div
+          class="ms-option"
+          *ngFor="let opt of filteredOptions"
+          [class.selected]="isSelected(opt.value)"
+          (click)="toggleOption(opt.value)"
+        >
+          <span class="ms-checkbox">
+            <svg *ngIf="isSelected(opt.value)" width="10" height="10" viewBox="0 0 10 10">
+              <path d="M1.5 5L4 7.5L8.5 2.5" stroke="currentColor" stroke-width="1.5"
+                    fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </span>
+          {{ opt.label }}
+        </div>
+
+        <div class="ms-empty" *ngIf="!filteredOptions.length">
+          Không tìm thấy kết quả
+        </div>
+      </div>
+
+      <div class="ms-footer">
+        <button type="button" (click)="selectAll()">Chọn tất cả</button>
+        <button type="button" (click)="clearAll()">Bỏ chọn</button>
+      </div>
+    </ng-container>
+
+    <!-- Clear — hiện ở cả 2 mode khi có giá trị -->
+    <div class="ms-footer" *ngIf="isTagMode && customTags.length">
+      <button type="button" (click)="clearAll()">Xóa tất cả</button>
+    </div>
+  </div>
+</div>

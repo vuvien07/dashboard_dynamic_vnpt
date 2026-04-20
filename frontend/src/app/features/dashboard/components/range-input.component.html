@@ -1,0 +1,17 @@
+<div [formGroup]="form" class="range-wrapper">
+  <div class="range-row">
+    <input
+      [type]="inputKind"
+      formControlName="from"
+      placeholder="Từ"
+      class="range-input"
+    />
+    <span class="range-sep">—</span>
+    <input
+      [type]="inputKind"
+      formControlName="to"
+      placeholder="Đến"
+      class="range-input"
+    />
+  </div>
+</div>

@@ -1,0 +1,48 @@
+<div class="app-shell">
+  <header class="topbar" [class.menu-open]="menuOpen">
+    <a routerLink="/dashboards" class="brand">Dashboard Dynamic</a>
+    <button
+      #menuToggle
+      type="button"
+      class="menu-toggle"
+      [attr.aria-expanded]="menuOpen"
+      aria-controls="topbar-nav"
+      aria-label="Mở menu điều hướng"
+      (click)="toggleMenu()">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+    <nav id="topbar-nav" class="nav-links" [class.is-open]="menuOpen">
+      <a
+        #firstNavLink
+        routerLink="/dashboards"
+        routerLinkActive="is-active"
+        ariaCurrentWhenActive="page"
+        (click)="closeMenu()">Dashboards</a>
+      <a
+        routerLink="/data-sources"
+        routerLinkActive="is-active"
+        [routerLinkActiveOptions]="{ exact: true }"
+        ariaCurrentWhenActive="page"
+        (click)="closeMenu()">Data Sources</a>
+      <a
+        routerLink="/guide"
+        routerLinkActive="is-active"
+        [routerLinkActiveOptions]="{ exact: true }"
+        ariaCurrentWhenActive="page"
+        (click)="closeMenu()">Hướng dẫn</a>
+    </nav>
+  </header>
+
+  <button
+    type="button"
+    class="menu-overlay"
+    [class.is-open]="menuOpen"
+    aria-label="Đóng menu điều hướng"
+    (click)="closeMenu()"></button>
+
+  <main>
+    <router-outlet></router-outlet>
+  </main>
+</div>

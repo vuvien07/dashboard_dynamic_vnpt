@@ -1,0 +1,154 @@
+<section class="page">
+  <header>
+    <h1>Data Source Management</h1>
+    <p>CRUD, test connection, và mapping field cho datasource.</p>
+  </header>
+
+  <article class="panel">
+    <h2>{{ editingId ? 'Edit Data Source' : 'Create Data Source' }}</h2>
+    <div class="form-grid">
+      <label>
+        ID
+        <input [(ngModel)]="form.id" [disabled]="!!editingId" />
+      </label>
+      <label>
+        Name
+        <input [(ngModel)]="form.name" />
+      </label>
+      <label>
+        Type
+        <select [(ngModel)]="form.type" (change)="onTypeChange()">
+          <option value="postgresql">postgresql</option>
+          <option value="clickhouse">clickhouse</option>
+          <option value="api">api</option>
+        </select>
+      </label>
+      <label>
+        Status
+        <select [(ngModel)]="form.status">
+          <option value="active">active</option>
+          <option value="inactive">inactive</option>
+        </select>
+      </label>
+      <label>
+        {{ form.type === 'api' ? 'API URL' : 'JDBC URL' }}
+        <input
+          [(ngModel)]="form.jdbcUrl"
+          [placeholder]="form.type === 'api' ? 'https://api.example.com/v1/metrics' : 'jdbc:postgresql://host:port/db'" />
+      </label>
+      <label *ngIf="form.type !== 'api'">
+        Username
+        <input [(ngModel)]="form.username" />
+      </label>
+      <label *ngIf="form.type !== 'api'">
+        Password
+        <input type="password" [(ngModel)]="form.password" />
+      </label>
+    </div>
+
+    <div class="api-grid" *ngIf="form.type === 'api'">
+      <label>
+        API Method
+        <select [(ngModel)]="apiConfig.method">
+          <option value="GET">GET</option>
+          <option value="POST">POST</option>
+          <option value="PUT">PUT</option>
+        </select>
+      </label>
+      <label>
+        Data Path
+        <input [(ngModel)]="apiConfig.dataPath" placeholder="items" />
+      </label>
+    </div>
+
+    <label class="mapping" *ngIf="form.type === 'api'">
+      API Headers (JSON)
+      <textarea rows="4" [(ngModel)]="apiConfig.headersText"></textarea>
+    </label>
+
+    <label class="mapping">
+      Field Mapping (JSON)
+      <textarea rows="6" [(ngModel)]="fieldMappingText"></textarea>
+    </label>
+
+    <div class="actions">
+      <button type="button" (click)="save()">{{ editingId ? 'Update' : 'Create' }}</button>
+      <button type="button" class="secondary" (click)="resetForm()">Reset</button>
+    </div>
+  </article>
+
+  <article class="panel" *ngIf="form.type === 'api'">
+    <h2>Preview sample response</h2>
+    <p class="preview-hint">
+      Dùng để xem payload API thực tế trước khi gắn datasource vào widget.
+      Nếu datasource chưa lưu, hãy Create/Update trước.
+    </p>
+
+    <div class="api-grid">
+      <label>
+        Widget Type
+        <select [(ngModel)]="previewConfig.widgetTypeCode">
+          <option value="kpi-card">kpi-card</option>
+          <option value="line-chart">line-chart</option>
+          <option value="bar-chart">bar-chart</option>
+          <option value="data-table">data-table</option>
+          <option value="list">list</option>
+        </select>
+      </label>
+    </div>
+
+    <label class="mapping">
+      Preview Query Config (JSON)
+      <textarea rows="5" [(ngModel)]="previewConfig.queryConfigText"></textarea>
+    </label>
+
+    <div class="actions">
+      <button type="button" (click)="previewSampleResponse()" [disabled]="isPreviewing">
+        {{ isPreviewing ? 'Đang preview...' : 'Preview sample response' }}
+      </button>
+    </div>
+
+    <p class="preview-message" *ngIf="previewMessage">{{ previewMessage }}</p>
+
+    <label class="mapping" *ngIf="previewResultText">
+      API Payload Preview
+      <textarea rows="10" [ngModel]="previewResultText" readonly></textarea>
+    </label>
+  </article>
+
+  <article class="panel">
+    <h2>Data Sources</h2>
+    <div class="table-scroll" *ngIf="items.length > 0; else emptyState">
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Type</th>
+            <th>Status</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of items">
+            <td>{{ item.id }}</td>
+            <td>{{ item.name }}</td>
+            <td>{{ item.type }}</td>
+            <td>{{ item.status }}</td>
+            <td class="row-actions">
+              <button type="button" (click)="edit(item.id)">Edit</button>
+              <button type="button" (click)="testConnection(item.id)">Test</button>
+              <button type="button" class="danger" (click)="remove(item.id)">Delete</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <ng-template #emptyState>
+      <p>Chưa có datasource.</p>
+    </ng-template>
+  </article>
+
+  <p class="message" *ngIf="message">{{ message }}</p>
+</section>

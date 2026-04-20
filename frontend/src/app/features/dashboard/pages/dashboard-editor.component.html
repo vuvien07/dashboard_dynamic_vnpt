@@ -1,0 +1,355 @@
+<section class="page" *ngIf="config; else loading">
+  <div class="page-alert" *ngIf="message" role="alert" aria-live="polite" aria-atomic="true">
+    <span>{{ message }}</span>
+    <button type="button" class="page-alert-close" (click)="closeMessage()" aria-label="Đóng thông báo">
+      ×
+    </button>
+  </div>
+
+  <header class="header">
+    <div class="header-main">
+      <h1>Customize: {{ config.dashboard.name }}</h1>
+      <p>Version: {{ config.dashboard.versionNo }}</p>
+    </div>
+    <a class="header-link-btn" [routerLink]="['/dashboards', config.dashboard.id, 'view']">Xem dashboard</a>
+  </header>
+
+  <article class="panel stats">
+    <h2>Thông tin dashboard</h2>
+    <div class="stats-grid">
+      <div>
+        <span class="label">Tổng widget trong dashboard</span>
+        <strong>{{ config.widgets.length }}</strong>
+      </div>
+      <div>
+        <span class="label">Widget có layout ở breakpoint hiện tại</span>
+        <strong>{{ currentLayouts().length }}</strong>
+      </div>
+      <div>
+        <span class="label">Breakpoint đang chỉnh</span>
+        <strong>{{ selectedBreakpoint.toUpperCase() }}</strong>
+      </div>
+    </div>
+  </article>
+
+  <article class="panel">
+    <h2>Thêm widget</h2>
+    <div class="widget-form-grid">
+      <label>
+        <span class="label">Widget ID</span>
+        <input type="text" [(ngModel)]="newWidget.id" placeholder="kpi-revenue" />
+      </label>
+      <label>
+        <span class="label">Tiêu đề</span>
+        <input type="text" [(ngModel)]="newWidget.title" placeholder="Revenue KPI" />
+      </label>
+      <label>
+        <span class="label">Loại widget</span>
+        <select [(ngModel)]="newWidget.widgetTypeCode">
+          <option value="kpi-card">kpi-card</option>
+          <option value="line-chart">line-chart</option>
+          <option value="bar-chart">bar-chart</option>
+          <option value="pie-chart">pie-chart</option>
+          <option value="data-table">data-table</option>
+          <option value="list">list</option>
+          <option value="custom.html">custom.html — Tùy biến HTML/CSS</option>
+        </select>
+      </label>
+      <label>
+        <span class="label">Data source ID</span>
+        <select [(ngModel)]="newWidget.dataSourceId">
+          <option value="">-- Chọn datasource --</option>
+          <option *ngFor="let ds of dataSourceOptions" [value]="ds.id">
+            {{ ds.name }} ({{ ds.id }})
+          </option>
+        </select>
+      </label>
+      <label>
+        <span class="label">X (grid)</span>
+        <input type="number" min="0" [(ngModel)]="newWidget.x" />
+      </label>
+      <label>
+        <span class="label">Y (grid)</span>
+        <input type="number" min="0" [(ngModel)]="newWidget.y" />
+      </label>
+      <label>
+        <span class="label">Width (grid)</span>
+        <input type="number" min="1" max="12" [(ngModel)]="newWidget.width" />
+      </label>
+      <label>
+        <span class="label">Height (grid)</span>
+        <input type="number" min="1" max="20" [(ngModel)]="newWidget.height" />
+      </label>
+      <label>
+        <span class="label">Áp dụng kích thước</span>
+        <select [(ngModel)]="newWidget.applyToAllBreakpoints">
+          <option [ngValue]="true">Tất cả breakpoint</option>
+          <option [ngValue]="false">Chỉ breakpoint hiện tại ({{ selectedBreakpoint.toUpperCase() }})</option>
+        </select>
+      </label>
+    </div>
+
+    <label class="query-config">
+      <span class="label">Query config (JSON)</span>
+      <textarea rows="5" [(ngModel)]="newWidgetQueryConfigText"></textarea>
+    </label>
+
+    <ng-container *ngIf="newWidget.widgetTypeCode === 'custom.html'">
+      <label class="query-config">
+        <span class="label">Mẫu custom.html</span>
+        <div class="preset-row">
+          <select [(ngModel)]="selectedCustomHtmlPreset">
+            <option *ngFor="let preset of customHtmlPresetOptions" [value]="preset.value">{{ preset.label }}</option>
+          </select>
+          <button type="button" class="preset-btn" (click)="applyCustomHtmlPreset()">Áp dụng mẫu</button>
+        </div>
+      </label>
+      <div class="custom-html-notice" ngNonBindable>
+        💡 Widget <strong>custom.html</strong> hỗ trợ datasource tùy chọn. Dữ liệu được inject vào trong iframe:
+        <br><br>
+        <strong>0. Chọn shape dữ liệu</strong> — trong <code>Query config (JSON)</code> thêm key <code>shape</code> với
+        một trong các giá trị <code>single</code>, <code>timeseries</code>, <code>category</code>, <code>table</code>
+        hoặc <code>list</code> để backend lấy đúng dạng dữ liệu.
+        <br>
+        <strong>1. Template biến</strong> — dùng <code>&#123;&#123;value&#125;&#125;</code>,
+        <code>&#123;&#123;previous&#125;&#125;</code>, <code>&#123;&#123;shape&#125;&#125;</code>… trực tiếp trong HTML
+        (thay thế tự động từ <code>payload</code>).
+        <br>
+        <strong>2. JavaScript</strong> — truy cập <code>window.WIDGET_DATA</code> trong thẻ <code>&lt;script&gt;</code>
+        để xử lý linh hoạt hơn.
+        <br><br>
+        Ví dụ:
+        <code>&lt;div&gt;&#123;&#123;value&#125;&#125; / &lt;script&gt;console.log(window.WIDGET_DATA)&lt;/script&gt;</code>
+      </div>
+      <label class="query-config">
+        <span class="label">HTML Template</span>
+        <textarea class="code-area" rows="8" [(ngModel)]="newWidgetHtmlTemplate" spellcheck="false"></textarea>
+      </label>
+      <label class="query-config">
+        <span class="label">CSS Template</span>
+        <textarea class="code-area" rows="6" [(ngModel)]="newWidgetCssTemplate" spellcheck="false"></textarea>
+      </label>
+    </ng-container>
+
+    <div class="widget-form-actions">
+      <button type="button" class="primary-btn" (click)="addWidget()">Thêm widget</button>
+    </div>
+  </article>
+
+  <article class="panel">
+    <h2>Thêm filter</h2>
+    <div class="widget-form-grid">
+      <label>
+        <span class="label">ID</span>
+        <input type="text" [(ngModel)]="newFilter.id" placeholder="filter-id" />
+      </label>
+      <label>
+        <span class="label">Tiêu đề</span>
+        <input type="text" [(ngModel)]="newFilter.title" placeholder="Filter name" />
+      </label>
+      <label>
+        <span class="label">Chọn dataset</span>
+        <select [(ngModel)]="newFilter.targetTable" (change)="onDatasetChange($event)">
+          <option value="">-- Chọn dataset --</option>
+          @for (item of analyticTableAndColumn; track item.table) {
+          <option [value]="item.table">{{item.table}}</option>
+          }
+        </select>
+      </label>
+      <label>
+        <span class="label">Chọn cột dữ liệu</span>
+        <select [(ngModel)]="newFilter.targetField" (change)="onColumnWithDatasetChange($event)">
+          <option value="">-- Chọn cột dữ liệu --</option>
+          @for (item of analyticColumns(); track $index) {
+          <option [value]="item">{{item}}</option>
+          }
+        </select>
+      </label>
+      <label>
+        <span class="label">Loại filter</span>
+        <select [(ngModel)]="newFilter.type">
+          <option value="">-- Chọn thể loại filter --</option>
+          @for (item of filterTypes(); track item.value) {
+          <option [value]="item.value">{{item.label}}</option>
+          }
+        </select>
+      </label>
+      <label>
+        <span class="label">X (grid)</span>
+        <input type="number" min="0" [(ngModel)]="newFilter.x" />
+      </label>
+      <label>
+        <span class="label">Y (grid)</span>
+        <input type="number" min="0" [(ngModel)]="newFilter.y" />
+      </label>
+      <label>
+        <span class="label">Width (grid)</span>
+        <input type="number" min="1" max="12" [(ngModel)]="newFilter.width" />
+      </label>
+      <label>
+        <span class="label">Áp dụng widgets</span>
+        <app-multiselect [options]="widgets" [(ngModel)]="selectedWidgets" />
+      </label>
+      <label>
+        <span class="label">Áp dụng kích thước</span>
+        <select [(ngModel)]="newFilter.applyToAllBreakpoints">
+          <option [ngValue]="true">Tất cả breakpoint</option>
+          <option [ngValue]="false">Chỉ breakpoint hiện tại ({{ selectedBreakpoint.toUpperCase() }})</option>
+        </select>
+      </label>
+    </div>
+    <div class="widget-form-actions">
+      <button type="button" class="primary-btn" (click)="addFilter()">Thêm filter</button>
+    </div>
+  </article>
+
+  <article class="panel">
+    <div class="toolbar">
+      <h2>Layout trực quan</h2>
+      <label for="breakpoint">Breakpoint:</label>
+      <select id="breakpoint" [value]="selectedBreakpoint" (change)="onBreakpointChange($event)">
+        <option *ngFor="let bp of availableBreakpoints()" [value]="bp">{{ bp.toUpperCase() }}</option>
+      </select>
+    </div>
+
+    <p class="hint">
+      Dùng mũi tên ← ↑ ↓ → trên từng widget để di chuyển mượt hơn. Vẫn có thể kéo-thả nếu cần.
+    </p>
+
+    <p class="hint">
+      Filters
+    </p>
+    <section class="layout-grid" [style.gridTemplateColumns]="gridTemplateColumns()" (dragover)="onGridDragOver($event)"
+      (drop)="onFilterGridDrop($event)">
+      <article class="widget-card" *ngFor="let filter of orderedFilters(); trackBy: trackByFilterId"
+        [style.gridColumn]="filterGridColumn(filter.id)" [style.gridRow]="filterGridRow(filter.id)" tabindex="0"
+        draggable="true" (keydown)="onFilterKeyMove($event, filter.id)" (dragstart)="onFilterDragStart(filter.id)"
+        (dragend)="onFilterDragEnd()">
+        <div class="widget-head">
+          <strong>{{ filter.label }}</strong>
+          <span>{{ filter.type }}</span>
+        </div>
+        <div class="widget-meta" *ngIf="layoutByFilterId(filter.id) as layout">
+          x={{ layout.x }}, y={{ layout.y }}, w={{ layout.w }}, h={{ layout.h }}
+        </div>
+        <div class="widget-actions">
+          <div class="move-actions" aria-label="Di chuyển widget">
+            <button type="button" class="action-btn" (click)="moveFilter(filter.id, -1, 0)">←</button>
+            <button type="button" class="action-btn" (click)="moveFilter(filter.id, 0, -1)">↑</button>
+            <button type="button" class="action-btn" (click)="moveFilter(filter.id, 0, 1)">↓</button>
+            <button type="button" class="action-btn" (click)="moveFilter(filter.id, 1, 0)">→</button>
+          </div>
+          <div class="resize-actions">
+            <button type="button" class="action-btn" (click)="resizeFilter(filter.id, -1, 0)">W -</button>
+            <button type="button" class="action-btn" (click)="resizeFilter(filter.id, 1, 0)">W +</button>
+          </div>
+          <button type="button" class="danger-btn" (click)="removeFilter(filter.id)">Xóa</button>
+        </div>
+      </article>
+    </section><br>
+
+    <p class="hint">
+      Widgets
+    </p>
+    <section class="layout-grid" [style.gridTemplateColumns]="gridTemplateColumns()" (dragover)="onGridDragOver($event)"
+      (drop)="onGridDrop($event)">
+      <article class="widget-card" *ngFor="let widget of orderedWidgets(); trackBy: trackByWidgetId"
+        [style.gridColumn]="widgetGridColumn(widget.id)" [style.gridRow]="widgetGridRow(widget.id)" tabindex="0"
+        draggable="true" (keydown)="onWidgetKeyMove($event, widget.id)" (dragstart)="onWidgetDragStart(widget.id)"
+        (dragend)="onWidgetDragEnd()">
+        <div class="widget-head">
+          <strong>{{ widget.title || widget.widgetTypeCode }}</strong>
+          <span>{{ widget.widgetTypeCode }}</span>
+        </div>
+        <div class="widget-meta" *ngIf="layoutByWidgetId(widget.id) as layout">
+          x={{ layout.x }}, y={{ layout.y }}, w={{ layout.w }}, h={{ layout.h }}
+        </div>
+        <div class="widget-actions">
+          <div class="move-actions" aria-label="Di chuyển widget">
+            <button type="button" class="action-btn" (click)="moveWidget(widget.id, -1, 0)">←</button>
+            <button type="button" class="action-btn" (click)="moveWidget(widget.id, 0, -1)">↑</button>
+            <button type="button" class="action-btn" (click)="moveWidget(widget.id, 0, 1)">↓</button>
+            <button type="button" class="action-btn" (click)="moveWidget(widget.id, 1, 0)">→</button>
+          </div>
+          <div class="resize-actions">
+            <button type="button" class="action-btn" (click)="resizeWidget(widget.id, -1, 0)">W -</button>
+            <button type="button" class="action-btn" (click)="resizeWidget(widget.id, 1, 0)">W +</button>
+            <button type="button" class="action-btn" (click)="resizeWidget(widget.id, 0, -1)">H -</button>
+            <button type="button" class="action-btn" (click)="resizeWidget(widget.id, 0, 1)">H +</button>
+          </div>
+          <button type="button" class="danger-btn" (click)="removeWidget(widget.id)">Xóa</button>
+        </div>
+      </article>
+    </section>
+  </article>
+
+  <article class="panel">
+    <h2>Kích thước widget chi tiết ({{ selectedBreakpoint.toUpperCase() }})</h2>
+    <div class="table-scroll" *ngIf="orderedWidgets().length > 0; else emptyState">
+      <table class="meta-table">
+        <thead>
+          <tr>
+            <th>Widget</th>
+            <th>Type</th>
+            <th>Size</th>
+            <th>Position</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <ng-container *ngFor="let widget of orderedWidgets(); trackBy: trackByWidgetId">
+            <tr>
+              <td>{{ widget.title || widget.id }}</td>
+              <td>{{ widget.widgetTypeCode }}</td>
+              <td>{{ layoutByWidgetId(widget.id)?.w || 0 }} x {{ layoutByWidgetId(widget.id)?.h || 0 }}</td>
+              <td>
+                ({{ layoutByWidgetId(widget.id)?.x || 0 }}, {{ layoutByWidgetId(widget.id)?.y || 0 }})
+              </td>
+              <td class="action-cell">
+                <button type="button" class="danger-btn" (click)="removeWidget(widget.id)">Xóa</button>
+                <button *ngIf="isCustomHtml(widget.widgetTypeCode)" type="button" class="edit-html-btn"
+                  (click)="openCustomHtmlEditor(widget)">
+                  Chỉnh HTML/CSS
+                </button>
+              </td>
+            </tr>
+            <tr *ngIf="customHtmlEditorOpen.has(widget.id)" class="custom-html-editor-row">
+              <td colspan="5" class="custom-html-editor-cell">
+                <div class="custom-html-editor-panel">
+                  <div class="che-col">
+                    <label class="che-label">HTML</label>
+                    <textarea class="code-area" rows="10" [(ngModel)]="customHtmlEditorState[widget.id].html"
+                      spellcheck="false">
+                  </textarea>
+                  </div>
+                  <div class="che-col">
+                    <label class="che-label">CSS</label>
+                    <textarea class="code-area" rows="10" [(ngModel)]="customHtmlEditorState[widget.id].css"
+                      spellcheck="false">
+                  </textarea>
+                  </div>
+                </div>
+                <div class="che-actions">
+                  <button type="button" class="primary-btn" (click)="applyCustomHtmlEdit(widget)">Lưu HTML/CSS</button>
+                  <button type="button" class="ghost-btn" (click)="closeCustomHtmlEditor(widget.id)">Hủy</button>
+                </div>
+              </td>
+            </tr>
+          </ng-container>
+        </tbody>
+      </table>
+    </div>
+
+    <ng-template #emptyState>
+      <p>Không có widget nào trong dashboard này.</p>
+    </ng-template>
+  </article>
+
+  <div class="save-actions">
+    <button type="button" class="primary-btn" (click)="saveLayout()">Save layout</button>
+  </div>
+</section>
+
+<ng-template #loading>
+  <p class="page">Đang tải dashboard...</p>
+</ng-template>

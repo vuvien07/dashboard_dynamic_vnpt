@@ -1,0 +1,42 @@
+<section class="guide-page">
+  <header class="guide-hero">
+    <div>
+      <p class="guide-kicker">Menu Hướng Dẫn</p>
+      <h1>Thiết lập dashboard theo từng bước</h1>
+      <p>Từ kết nối dữ liệu đến review cuối cùng, chọn từng bước trong menu để thao tác nhanh bằng link có sẵn.</p>
+    </div>
+    <a class="back-link" routerLink="/dashboards">Quay lại Dashboards</a>
+  </header>
+
+  <section class="guide-layout">
+    <nav class="step-menu" aria-label="Các bước hướng dẫn">
+      <button
+        type="button"
+        *ngFor="let step of steps"
+        class="step-item"
+        [class.is-active]="step.id === activeStepId"
+        (click)="setActiveStep(step.id)">
+        <span class="step-no">B{{ step.id }}</span>
+        <span>{{ step.title }}</span>
+      </button>
+    </nav>
+
+    <article class="step-detail">
+      <img [src]="activeStep.imageUrl" [alt]="activeStep.imageAlt" />
+
+      <div class="detail-head">
+        <span class="badge">Bước {{ activeStep.id }}/{{ steps.length }}</span>
+        <h2>{{ activeStep.title }}</h2>
+        <p>{{ activeStep.objective }}</p>
+      </div>
+
+      <ul class="checklist">
+        <li *ngFor="let item of activeStep.checklist">{{ item }}</li>
+      </ul>
+
+      <div class="action-links">
+        <a *ngFor="let action of activeStep.actions" class="action-btn" [routerLink]="action.route">{{ action.label }}</a>
+      </div>
+    </article>
+  </section>
+</section>

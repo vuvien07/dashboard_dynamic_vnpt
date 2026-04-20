@@ -1,0 +1,10 @@
+<svg width="1200" height="500" viewBox="0 0 1200 500" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="500" fill="#f6f8fc"/>
+  <rect x="90" y="90" width="1020" height="320" rx="20" fill="#ffffff" stroke="#d4dff0"/>
+  <text x="140" y="150" font-size="34" fill="#14314d" font-family="Segoe UI">Create Dashboard</text>
+  <rect x="140" y="190" width="920" height="56" rx="10" fill="#f1f6fe" stroke="#d4e3f8"/>
+  <rect x="140" y="264" width="620" height="56" rx="10" fill="#f1f6fe" stroke="#d4e3f8"/>
+  <rect x="780" y="264" width="280" height="56" rx="10" fill="#f1f6fe" stroke="#d4e3f8"/>
+  <rect x="860" y="340" width="200" height="50" rx="10" fill="#0f62fe"/>
+  <text x="905" y="372" font-size="22" fill="#fff" font-family="Segoe UI">Create</text>
+</svg>

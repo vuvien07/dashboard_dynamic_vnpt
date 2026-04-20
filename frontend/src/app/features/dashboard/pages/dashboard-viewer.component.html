@@ -1,0 +1,151 @@
+<section class="page" *ngIf="config(); else loading" [class.fullscreen-mode]="isFullscreen()">
+  <header class="hero">
+    <div class="hero-main">
+      <p class="eyebrow">Hospital Insight Console</p>
+      <h1>{{ config()?.dashboard?.name }}</h1>
+      <p class="hero-subtitle">Theo dõi dữ liệu vận hành theo thời gian thực, tối ưu quyết định lâm sàng và quản trị
+        bệnh viện.</p>
+      <div class="meta-chips">
+        <span class="chip">ID: {{ config()?.dashboard?.id }}</span>
+        <span class="chip">Phiên bản: {{ config()?.dashboard?.versionNo }}</span>
+      </div>
+    </div>
+
+    <div class="hero-actions">
+      <a class="ghost-btn" [routerLink]="['/dashboards']">Danh sách dashboard</a>
+      <button class="fullscreen-btn" (click)="toggleFullscreen()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="15 3 21 3 21 9"></polyline>
+          <polyline points="9 21 3 21 3 15"></polyline>
+          <line x1="21" y1="3" x2="14" y2="10"></line>
+          <line x1="3" y1="21" x2="10" y2="14"></line>
+        </svg>
+        Toàn màn hình
+      </button>
+      <a class="primary-btn" [routerLink]="['/dashboards', config()?.dashboard?.id, 'edit']">Tùy chỉnh bố cục</a>
+    </div>
+  </header>
+
+  <section class="toolbar" *ngIf="breakpoints().length > 0">
+    <div class="toolbar-labels">
+      <p>Chế độ hiển thị</p>
+      <small>Đổi breakpoint và bộ lọc để đồng bộ dữ liệu cho toàn bộ widget.</small>
+    </div>
+
+  </section>
+
+  <section class="filter-grid" [style.gridTemplateColumns]="gridTemplateColumns()">
+    <article class="filter-card" *ngFor="let filter of orderedFilters()"
+      [style.gridColumn]="filterGridColumn(filter.id)" [style.gridRow]="filterGridRow(filter.id)">
+      <label class="breakpoint-select" style="margin-bottom: 1vh;">
+        <span>{{ filter.label }}</span>
+      </label>
+      @if(filter.type === 'in'){
+      <app-multiselect [options]="optionsMap[filter.id] || []"></app-multiselect>
+      }@else if (filter.type === 'range') {
+      <app-range-input [dataType]="filter.fieldType"
+        (valueChange)="handleChangeRangeInput($event, filter.id)"></app-range-input>
+      }@else {
+      <app-vanilla-input [dataType]="filter.fieldType"
+      [placeholder]="filter.placeholder"
+      [options]="optionsMap[filter.id] || []"
+        (valueChange)="handleChangeVanillaInput($event, filter.id)"></app-vanilla-input>
+      }
+    </article>
+  </section>
+  <button type="button" style="margin: 0 28px 32px;" class="primary-btn" (click)="handleApplyFilter()">Tìm kiếm</button>
+
+  <div class="fs-bar" *ngIf="isFullscreen()">
+    <span class="fs-title">{{ config()?.dashboard?.name }}</span>
+    <button class="fs-exit-btn" (click)="toggleFullscreen()">
+      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+        stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="4 14 10 14 10 20"></polyline>
+        <polyline points="20 10 14 10 14 4"></polyline>
+        <line x1="10" y1="14" x2="21" y2="3"></line>
+        <line x1="3" y1="21" x2="14" y2="10"></line>
+      </svg>
+      Thoát toàn màn hình
+    </button>
+  </div>
+
+  <section class="grid" [style.gridTemplateColumns]="gridTemplateColumns()">
+    <article class="widget-card"
+      [class.widget-kpi]="widget.widgetTypeCode === 'kpi-card' || widget.widgetTypeCode === 'metric-card'"
+      [class.widget-chart]="widget.widgetTypeCode.includes('chart')" *ngFor="let widget of orderedWidgets()"
+      [style.gridColumn]="widgetGridColumn(widget.id)" [style.gridRow]="widgetGridRow(widget.id)">
+      <div class="widget-head">
+        <div>
+          <h3>{{ widget.title || widget.widgetTypeCode }}</h3>
+        </div>
+        <span class="data-pill">{{ widget.dataSourceId || 'local' }}</span>
+        <span class="data-pill" *ngIf="widget.refreshIntervalSec">{{ widget.refreshIntervalSec }} giây</span>
+      </div>
+
+      <ng-container *ngIf="widget.widgetTypeCode !== 'custom.html'; else customHtmlWidget">
+        <ng-container *ngIf="widgetData(widget.id) as data; else loadingWidget">
+          <div *ngIf="data.shape === 'single'" class="single">
+            <div class="single-value">{{ formatValue(data.payload['value'], singleUnit(data)) }}</div>
+            <div class="single-sub">Kỳ trước: {{ formatValue(data.payload['previous'], singleUnit(data)) }}</div>
+          </div>
+
+          <div *ngIf="data.shape === 'timeseries'" class="chart-box">
+            <canvas baseChart [type]="'line'" [data]="lineChartData(data)" [options]="lineChartOptions(data)">
+            </canvas>
+          </div>
+
+          <div *ngIf="data.shape === 'category'" class="chart-box">
+            <canvas *ngIf="widget.widgetTypeCode !== 'pie-chart'; else pieTemplate" baseChart [type]="'bar'"
+              [data]="categoryBarChartData(data)" [options]="categoryBarOptions(data)">
+            </canvas>
+            <ng-template #pieTemplate>
+              <canvas baseChart [type]="'pie'" [data]="categoryPieChartData(data)" [options]="categoryPieOptions(data)">
+              </canvas>
+            </ng-template>
+          </div>
+
+          <div *ngIf="data.shape === 'table'" class="table-wrap">
+            <table class="widget-table">
+              <thead>
+                <tr>
+                  <th *ngFor="let col of tableColumns(data)">{{ col }}</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let row of tableRows(data)">
+                  <td *ngFor="let col of tableColumns(data)">{{ row[col] }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <ul *ngIf="data.shape === 'list'" class="list-widget">
+            <li *ngFor="let item of listItems(data)">
+              <span>{{ item['label'] }}</span>
+              <div class="list-value">
+                <strong>{{ item['value'] }}</strong>
+                <em>{{ item['status'] || 'normal' }}</em>
+              </div>
+            </li>
+          </ul>
+        </ng-container>
+        <ng-template #loadingWidget>
+          <p class="loading">Đang tải dữ liệu widget...</p>
+        </ng-template>
+      </ng-container>
+
+      <ng-template #customHtmlWidget>
+        <iframe class="custom-html-iframe" [srcdoc]="customWidgetSrcdoc(widget, widgetData(widget.id))"
+          sandbox="allow-scripts" frameborder="0">
+        </iframe>
+      </ng-template>
+    </article>
+  </section>
+</section>
+
+<ng-template #loading>
+  <section class="page loading-state">
+    <p>Đang tải dashboard...</p>
+  </section>
+</ng-template>
