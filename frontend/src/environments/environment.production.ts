@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  apiBaseUrl: 'https://dashboard-dynmic.vercel.app/api/v1'
+  apiBaseUrl: 'http://localhost:8080/api/v1'
 };
